@@ -1,0 +1,96 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+public class PlayerController : MonoBehaviour
+{
+    public float speed;
+
+    public Text CountText;
+    public Text WinText;
+    public Text GameOver;
+    public Text LifeText;
+
+    private Rigidbody2D rb2d;
+
+    private int count;
+    private int lives = 3;
+
+    private void Start()
+    {
+        rb2d = GetComponent<Rigidbody2D>();
+        count = 0;
+        WinText.text = "";
+        GameOver.text = "";
+        SetCountText();
+        SetGOText();
+    }
+
+    // Start is called before the first frame update
+    void FixedUpdate()
+    {
+        float moveHorizontal = Input.GetAxis("Horizontal");
+        float moveVertical = Input.GetAxis("Vertical");
+        Vector2 movement = new Vector2(moveHorizontal, moveVertical);
+        rb2d.AddForce(movement * speed);
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.CompareTag("Pickup"))
+        {
+            other.gameObject.SetActive(false);
+            count = count + 1;
+            SetCountText();
+        }
+
+        if (other.gameObject.CompareTag("enemy"))
+        {
+            other.gameObject.SetActive(false);
+            lives = lives - 1;
+
+            SetGOText();
+        }
+    }
+
+    void SetCountText()
+    {
+        CountText.text = "Count: " + count.ToString();
+        if (count >= 10)
+        {
+
+            if (SceneManager.GetActiveScene().buildIndex == 1)
+            {
+                WinText.text = "You win! Game Created by Michael Arnett! Press ESC";
+            }
+
+            if (SceneManager.GetActiveScene().buildIndex == 0)
+            {
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+            }
+                
+
+        }
+    }
+
+    void SetGOText()
+    {
+        LifeText.text = "Lives: " + lives.ToString();
+        if (lives < 1)
+        {
+            if (gameObject != null)
+            {
+                Destroy(gameObject);
+            }
+              
+            GameOver.text = "Game Over!";
+        }
+    }
+
+    private void Update()
+    {
+        if (Input.GetKey("escape"))
+            Application.Quit();
+    }
+}
